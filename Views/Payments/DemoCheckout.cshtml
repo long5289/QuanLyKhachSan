@@ -1,0 +1,21 @@
+@model HotelBooking.Web.Models.DemoCheckoutViewModel
+@{ ViewData["Title"] = "Thanh toán online (demo)"; }
+<div class="container py-5 checkout-page">
+    <div class="checkout-heading"><p class="eyebrow">ROYAL HOTEL / CHECKOUT DEMO</p><h1>@(Model.IsServiceSupplement ? "Thanh toán dịch vụ bổ sung" : "Thanh toán an toàn")</h1><p>Đây là giao diện mô phỏng. Không nhập thẻ thật; dữ liệu ở các ô thẻ không được gửi lên máy chủ hoặc lưu lại.</p></div>
+    <div class="checkout-grid">
+        <section class="card-entry-panel">
+            <div class="demo-alert"><strong>Chế độ demo</strong><span>Thao tác xác nhận chỉ mô phỏng thanh toán thành công.</span></div>
+            <form asp-action="CompleteDemo" method="post" class="card-form">
+                <input type="hidden" name="bookingId" value="@Model.BookingId" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <label for="demo-card-name">Tên chủ thẻ</label>
+                <input id="demo-card-name" class="form-control" type="text" autocomplete="off" placeholder="NGUYEN VAN A" required />
+                <label for="demo-card-number">Số thẻ (chỉ dữ liệu giả)</label>
+                <input id="demo-card-number" class="form-control" type="text" inputmode="numeric" autocomplete="off" placeholder="0000 0000 0000 0000" pattern="[0-9 ]{12,23}" maxlength="23" required />
+                <div class="card-expiry-row"><div><label for="demo-card-expiry">Ngày hết hạn</label><input id="demo-card-expiry" class="form-control" type="text" autocomplete="off" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])/[0-9]{2}" maxlength="5" required /></div><div><label for="demo-card-cvc">CVC</label><input id="demo-card-cvc" class="form-control" type="password" inputmode="numeric" autocomplete="off" placeholder="000" pattern="[0-9]{3,4}" maxlength="4" required /></div></div>
+                <button class="primary-action" type="submit">Mô phỏng thanh toán @Model.Amount.ToString("N0") VNĐ</button>
+            </form>
+        </section>
+        <aside class="checkout-summary"><p class="eyebrow">CHI TIẾT ĐẶT PHÒNG</p><h2>@Model.RoomName</h2><p>@Model.CheckIn.ToString("dd/MM/yyyy") - @Model.CheckOut.ToString("dd/MM/yyyy")</p><p>Khách: @Model.GuestName</p><div class="checkout-total"><span>Tổng thanh toán</span><strong>@Model.Amount.ToString("N0") VNĐ</strong></div><small>Mã đặt phòng #@Model.BookingId</small></aside>
+    </div>
+</div>

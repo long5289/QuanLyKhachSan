@@ -1,0 +1,17 @@
+@model HotelBooking.Web.Models.AdminDashboardViewModel
+@{ ViewData["Title"] = "Quản trị"; }
+<div class="container py-5 admin-page">
+    <div class="admin-heading"><div><p class="eyebrow">BẢNG ĐIỀU KHIỂN</p><h1>Vận hành Royal Hotel</h1></div><div class="admin-actions"><a class="primary-action" asp-action="Rooms" asp-fragment="add-room">+ Thêm phòng</a><a asp-action="Rooms">Phòng</a><a asp-action="Services">Dịch vụ</a><a asp-action="Staff">Nhân viên</a><a asp-action="Payments">Thanh toán</a><a asp-action="Reviews">Đánh giá</a><a asp-action="Customers">Khách hàng</a><a asp-action="Reports">Báo cáo</a></div></div>
+    <div class="stats-grid">
+        <div class="stat-card"><span>Tổng số phòng</span><strong>@Model.TotalRooms</strong></div>
+        <div class="stat-card"><span>Phòng sẵn sàng</span><strong>@Model.AvailableRooms</strong></div>
+        <div class="stat-card"><span>Chờ xác nhận</span><strong>@Model.PendingBookings</strong></div>
+        <div class="stat-card"><span>Doanh thu dự kiến</span><strong>@Model.Revenue.ToString("N0")</strong></div>
+    </div>
+    <h2 class="section-title">Đặt phòng gần đây</h2>
+    @if (TempData["BookingCancellationNotice"] is string cancellationNotice) { <div class="alert alert-warning">@cancellationNotice</div> }
+    <div class="table-wrap"><table class="table align-middle"><thead><tr><th>Khách hàng</th><th>Phòng</th><th>Thời gian</th><th>Đặt phòng</th><th>Thanh toán</th><th></th></tr></thead><tbody>
+    @foreach (var booking in Model.RecentBookings)
+    { <tr><td>@booking.Customer.FullName<br /><small>@booking.Customer.Email</small></td><td>@booking.Room.Name</td><td>@booking.CheckIn.ToString("dd/MM") - @booking.CheckOut.ToString("dd/MM")</td><td>@booking.Status</td><td>@booking.Payment?.Status</td><td class="booking-actions">@if (booking.Status == BookingStatus.Pending) { <form asp-action="SetBookingStatus" method="post"><input type="hidden" name="id" value="@booking.Id" /><input type="hidden" name="status" value="Confirmed" /><button class="table-action" type="submit">Xác nhận</button></form> } @if (booking.Status == BookingStatus.Pending || booking.Status == BookingStatus.Confirmed) { <form asp-action="SetBookingStatus" method="post" onsubmit="return confirm('Bạn chắc chắn muốn hủy booking #@booking.Id?')"><input type="hidden" name="id" value="@booking.Id" /><input type="hidden" name="status" value="Cancelled" /><button class="table-action booking-cancel-action" type="submit">Hủy đặt phòng</button></form> } @if (booking.Payment?.Status == PaymentStatus.Pending) { <form asp-action="SetPaymentStatus" method="post"><input type="hidden" name="bookingId" value="@booking.Id" /><input type="hidden" name="status" value="Paid" /><button class="table-action" type="submit">Đã thu tiền</button></form> }</td></tr> }
+    </tbody></table></div>
+</div>

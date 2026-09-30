@@ -1,0 +1,11 @@
+@model int
+@{ ViewData["Title"] = "Đã nhận yêu cầu"; }
+<div class="container py-5 success-panel">
+    <p class="eyebrow">ĐẶT PHÒNG THÀNH CÔNG</p>
+    <h1>Cảm ơn bạn đã chọn Royal Hotel.</h1>
+    <p>Yêu cầu đặt phòng đã được ghi nhận. Nhân viên sẽ liên hệ qua email hoặc số điện thoại để xác nhận.</p>
+    <p class="text-muted">Mã đặt phòng: #@Model</p>
+    <a class="primary-action d-inline-block me-2" asp-controller="Bookings" asp-action="Details" asp-route-id="@Model">Xem chi tiết / thêm dịch vụ</a>
+    <a class="secondary-action d-inline-block me-2" asp-controller="Reviews" asp-action="Create" asp-route-bookingId="@Model">Đánh giá phòng</a>
+    <a class="primary-action d-inline-block" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+</div>

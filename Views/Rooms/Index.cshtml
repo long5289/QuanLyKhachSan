@@ -1,0 +1,71 @@
+@model HotelBooking.Web.Models.RoomCalendarViewModel
+@{
+    ViewData["Title"] = "Tất cả phòng";
+    var previousMonth = Model.Month.AddMonths(-1);
+    var nextMonth = Model.Month.AddMonths(1);
+}
+<div class="container py-5 room-inventory-page">
+    <div class="inventory-heading">
+        <div><p class="eyebrow">ROYAL HOTEL / DANH MỤC PHÒNG</p><h1>Tất cả phòng</h1><p>Xem toàn bộ phòng và lịch tình trạng theo từng ngày.</p></div>
+        <div class="month-navigation"><a asp-action="Index" asp-route-year="@previousMonth.Year" asp-route-month="@previousMonth.Month" aria-label="Tháng trước">←</a><strong>@Model.Month.ToString("MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</strong><a asp-action="Index" asp-route-year="@nextMonth.Year" asp-route-month="@nextMonth.Month" aria-label="Tháng sau">→</a></div>
+    </div>
+
+    <div class="calendar-legend" aria-label="Chú giải lịch phòng"><span><i class="calendar-available"></i> Trống</span><span><i class="calendar-booked"></i> Đã đặt</span><span><i class="calendar-maintenance"></i> Bảo trì</span></div>
+
+    @if (Model.Rooms.Count == 0)
+    {
+        <p class="alert alert-light border mt-4">Khách sạn chưa có phòng nào trong danh mục.</p>
+    }
+    else
+    {
+        <div class="room-inventory-list">
+            @foreach (var entry in Model.Rooms)
+            {
+                <article class="inventory-room-card">
+                    <div class="room-image room-image-@entry.Room.Type.ToLowerInvariant() inventory-room-image"><span>@entry.Room.Type</span></div>
+                    <div class="inventory-room-content">
+                        <div class="inventory-room-heading">
+                            <div><p class="room-code">@entry.Room.Code · @entry.Room.Capacity khách</p><h2>@entry.Room.Name</h2><p class="inventory-room-description">@entry.Room.Description</p></div>
+                            <strong class="inventory-room-price">@entry.Room.PricePerNight.ToString("N0") <small>VNĐ / đêm</small></strong>
+                        </div>
+                        <div class="inventory-review">
+                            @if (entry.RecentReview is not null)
+                            {
+                                <div class="inventory-review-heading"><span>Đánh giá gần nhất</span><span class="review-stars">@(new string('★', entry.RecentReview.Rating))</span></div>
+                                <p>“@entry.RecentReview.Comment”</p>
+                                <small>@entry.RecentReview.Customer.FullName · @entry.RecentReview.CreatedAt.ToString("dd/MM/yyyy")</small>
+                            }
+                            else
+                            {
+                                <div class="inventory-review-heading"><span>Đánh giá gần nhất</span><span class="review-stars">Chưa có</span></div>
+                                <p>Phòng này chưa có đánh giá.</p>
+                            }
+                        </div>
+                        <div class="room-calendar-heading"><strong>Lịch phòng</strong><span>@Model.Month.ToString("MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</span></div>
+                        <div class="room-calendar-grid" role="group" aria-label="Lịch @entry.Room.Name tháng @Model.Month.ToString("MM/yyyy")">
+                            @foreach (var weekday in new[] { "T2", "T3", "T4", "T5", "T6", "T7", "CN" })
+                            {
+                                <span class="calendar-weekday">@weekday</span>
+                            }
+                            @foreach (var day in entry.CalendarSlots)
+                            {
+                                if (day is null)
+                                {
+                                    <span class="calendar-empty" aria-hidden="true"></span>
+                                }
+                                else
+                                {
+                                    <div class="calendar-date-cell @day.CssClass @(day.Date.Date == DateTime.Today ? "calendar-today" : string.Empty)" title="@day.Date.ToString("dd/MM/yyyy") · @day.Description" aria-label="@day.Date.ToString("dd/MM/yyyy"): @day.Description">
+                                        <span class="calendar-date-number">@day.Date.Day</span>
+                                        <span class="calendar-status-text">@(day.Status == "Trống" ? "Trống" : day.Status == "Đã đặt" ? "Đặt" : "BT")</span>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <a class="primary-action room-booking-action" asp-controller="Bookings" asp-action="Create" asp-route-roomId="@entry.Room.Id" asp-route-checkIn="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" asp-route-checkOut="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")">Chọn phòng để đặt <span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</div>

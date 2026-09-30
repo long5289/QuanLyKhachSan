@@ -1,0 +1,54 @@
+@model IReadOnlyList<HotelBooking.Web.Models.Booking>
+@{ ViewData["Title"] = "Lịch đặt phòng"; }
+<div class="container py-5">
+	<p class="eyebrow">KHÔNG GIAN CỦA BẠN</p>
+	<h1 class="display-5">Lịch đặt phòng</h1>
+	@if (Model.Count == 0)
+	{
+		<div class="alert alert-light border mt-4">Bạn chưa có booking nào.</div>
+	}
+	else
+	{
+		<div class="table-wrap mt-4">
+			<table class="table align-middle">
+				<thead><tr><th>Phòng</th><th>Thời gian</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+				<tbody>
+				@foreach (var booking in Model)
+				{
+					<tr>
+						<td>@booking.Room.Name</td>
+						<td>@booking.CheckIn.ToString("dd/MM/yyyy") - @booking.CheckOut.ToString("dd/MM/yyyy")</td>
+						<td>@booking.TotalAmount.ToString("N0") VNĐ<br /><small>@booking.BookingServices.Count dịch vụ</small></td>
+						<td>@booking.Status<br /><small>@booking.Payment?.Method · @booking.Payment?.Status</small></td>
+						<td class="booking-customer-actions">
+							<div class="booking-primary-actions">
+							<a class="secondary-action booking-details-link" asp-action="Details" asp-route-id="@booking.Id">Chi tiết</a>
+							@if (booking.Status is BookingStatus.Pending or BookingStatus.Confirmed)
+							{
+								<form asp-action="Cancel" method="post"><input type="hidden" name="id" value="@booking.Id" /><button class="secondary-action booking-cancel-action" type="submit">Hủy booking</button></form>
+							}
+						</div>
+							@if (booking.Status != BookingStatus.Cancelled)
+							{
+								var review = booking.Reviews.FirstOrDefault();
+								@if (review is null)
+								{
+									<a class="primary-action review-action" asp-controller="Reviews" asp-action="Create" asp-route-bookingId="@booking.Id">Đánh giá</a>
+								}
+								else
+								{
+									<div class="booking-review-actions"><span class="review-submitted">Đã đánh giá · @(new string('★', review.Rating))</span><a class="secondary-action" asp-controller="Reviews" asp-action="Edit" asp-route-id="@review.Id">Sửa</a><form asp-controller="Reviews" asp-action="Delete" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?')"><input type="hidden" name="id" value="@review.Id" /><button class="secondary-action booking-cancel-action" type="submit">Xóa</button></form></div>
+								}
+							}
+							else
+							{
+								<span class="review-unavailable">Booking đã hủy.</span>
+							}
+						</td>
+					</tr>
+				}
+				</tbody>
+			</table>
+		</div>
+	}
+</div>

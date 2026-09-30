@@ -1,0 +1,7 @@
+@model IReadOnlyList<HotelBooking.Web.Models.Review>
+@{ ViewData["Title"] = "Đánh giá khách hàng"; }
+<div class="container py-5 admin-page">
+    <div class="admin-heading"><div><p class="eyebrow">PHẢN HỒI KHÁCH HÀNG</p><h1>Đánh giá</h1></div><a asp-action="Index">← Tổng quan</a></div>
+    @if (Model.Count == 0) { <p>Chưa có đánh giá nào.</p> }
+    <div class="review-list">@foreach (var review in Model) { <article class="review-card"><div class="review-card-heading"><strong>@review.Customer.FullName</strong><span>@("★".PadLeft(review.Rating, '★'))</span></div><p>@review.Comment</p><small>@review.Booking.Room.Name · @review.CreatedAt.ToString("dd/MM/yyyy") · Booking #@review.BookingId</small><form asp-action="DeleteReview" method="post"><input type="hidden" name="id" value="@review.Id" /><button class="table-action" type="submit">Gỡ đánh giá</button></form></article> }</div>
+</div>

@@ -1,0 +1,24 @@
+# Build output
+bin/
+obj/
+artifacts/
+
+# Visual Studio and Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local secrets and environment files
+appsettings.Local.json
+appsettings.*.Local.json
+.env
+.env.*
+!.env.example
+secrets.json
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

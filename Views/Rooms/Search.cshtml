@@ -1,0 +1,46 @@
+@model HotelBooking.Web.Models.RoomSearchResultViewModel
+@{ ViewData["Title"] = "Phòng phù hợp"; }
+
+<div class="container py-5">
+    <p class="eyebrow">KẾT QUẢ TÌM KIẾM</p>
+    <h1 class="display-5">Phòng cho @Model.Search.Guests khách</h1>
+    <p class="text-muted">@Model.Search.CheckIn.ToString("dd/MM/yyyy") - @Model.Search.CheckOut.ToString("dd/MM/yyyy")</p>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All" class="alert alert-warning"></div>
+    }
+    else if (Model.Rooms.Count == 0)
+    {
+        <div class="alert alert-light border mt-4">Chưa có phòng phù hợp trong khoảng thời gian này.</div>
+    }
+    else
+    {
+        <div class="room-search-list mt-4">
+            @foreach (var result in Model.Rooms)
+            {
+                <article class="inventory-room-card search-room-card">
+                    <div class="room-image room-image-@result.Room.Type.ToLowerInvariant() inventory-room-image"><span>@result.Room.Type</span></div>
+                    <div class="inventory-room-content">
+                        <div class="inventory-room-heading"><div><p class="room-code">@result.Room.Code · @result.Room.Capacity khách</p><h2>@result.Room.Name</h2><p class="inventory-room-description">@result.Room.Description</p></div><strong class="inventory-room-price">@result.Room.PricePerNight.ToString("N0") <small>VNĐ / đêm</small></strong></div>
+                        <div class="inventory-review">
+                            @if (result.RecentReview is not null)
+                            {
+                                <div class="inventory-review-heading"><span>Đánh giá gần nhất</span><span class="review-stars">@(new string('★', result.RecentReview.Rating))</span></div>
+                                <p>“@result.RecentReview.Comment”</p>
+                                <small>@result.RecentReview.Customer.FullName · @result.RecentReview.CreatedAt.ToString("dd/MM/yyyy")</small>
+                            }
+                            else
+                            {
+                                <div class="inventory-review-heading"><span>Đánh giá gần nhất</span><span class="review-stars">Chưa có</span></div>
+                                <p>Phòng này chưa có đánh giá.</p>
+                            }
+                        </div>
+                        <p class="available-period">Còn phòng: @Model.Search.CheckIn.ToString("dd/MM/yyyy") – @Model.Search.CheckOut.ToString("dd/MM/yyyy")</p>
+                        <a class="primary-action room-booking-action" asp-controller="Bookings" asp-action="Create" asp-route-roomId="@result.Room.Id" asp-route-checkIn="@Model.Search.CheckIn.ToString("O")" asp-route-checkOut="@Model.Search.CheckOut.ToString("O")">Chọn phòng để đặt <span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</div>

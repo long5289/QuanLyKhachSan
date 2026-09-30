@@ -1,0 +1,3 @@
+@model IReadOnlyList<HotelBooking.Web.Models.Service>
+@{ ViewData["Title"] = "Dịch vụ"; }
+<div class="container py-5"><p class="eyebrow">DỊCH VỤ TẠI ROYAL HOTEL</p><h1 class="display-5">Những điều nhỏ làm chuyến đi dễ chịu hơn.</h1><div class="service-grid mt-5">@foreach (var service in Model) { <article class="service-card"><p class="eyebrow">ROYAL CARE</p><h2>@service.Name</h2><p>@service.Description</p><strong>@service.Price.ToString("N0") VNĐ</strong></article> }</div></div>

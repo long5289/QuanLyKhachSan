@@ -1,0 +1,25 @@
+@model HotelBooking.Web.Models.ReviewCreateViewModel
+@{ ViewData["Title"] = "Sửa đánh giá"; }
+<div class="container py-5 account-page">
+    <p class="eyebrow">CẬP NHẬT PHẢN HỒI</p>
+    <h1>Sửa đánh giá phòng</h1>
+    <form asp-action="Edit" method="post" class="form-panel">
+        <input asp-for="BookingId" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <label asp-for="Rating"></label>
+        <select asp-for="Rating" class="form-select">
+            <option value="5">5 sao - Tuyệt vời</option>
+            <option value="4">4 sao - Rất tốt</option>
+            <option value="3">3 sao - Tốt</option>
+            <option value="2">2 sao - Cần cải thiện</option>
+            <option value="1">1 sao - Chưa hài lòng</option>
+        </select>
+        <label asp-for="Comment"></label>
+        <textarea asp-for="Comment" class="form-control" rows="5"></textarea>
+        <div class="review-form-actions">
+            <button class="primary-action" type="submit">Lưu thay đổi</button>
+            <a class="secondary-action" asp-controller="Bookings" asp-action="Mine">Hủy</a>
+        </div>
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

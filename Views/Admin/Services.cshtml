@@ -1,0 +1,5 @@
+@model IReadOnlyList<HotelBooking.Web.Models.Service>
+@{ ViewData["Title"] = "Quản lý dịch vụ"; }
+<div class="container py-5 admin-page"><div class="admin-heading"><div><p class="eyebrow">QUẢN LÝ DỊCH VỤ</p><h1>Dịch vụ khách sạn</h1></div><a asp-action="Index">← Tổng quan</a></div>
+<form asp-action="AddService" method="post" class="admin-form service-admin-form"><h2>Thêm dịch vụ</h2><input name="Name" placeholder="Tên dịch vụ" required /><input name="Price" type="number" min="0" step="1000" placeholder="Giá" required /><input name="Description" placeholder="Mô tả" /><button class="primary-action" type="submit">Thêm dịch vụ</button></form>
+<div class="table-wrap mt-5"><table class="table"><thead><tr><th>Tên</th><th>Giá</th><th>Mô tả</th><th></th></tr></thead><tbody>@foreach (var service in Model) { <tr><td>@service.Name</td><td>@service.Price.ToString("N0") VNĐ</td><td>@service.Description</td><td><form asp-action="DeleteService" method="post"><input type="hidden" name="id" value="@service.Id" /><button class="table-action" type="submit">Xóa</button></form></td></tr> }</tbody></table></div></div>

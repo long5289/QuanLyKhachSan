@@ -1,0 +1,120 @@
+@model HotelBooking.Web.Models.BookingDetailsViewModel
+@{
+    ViewData["Title"] = "Chi tiết đặt phòng";
+    var booking = Model.Booking;
+}
+<div class="container py-5 booking-details-page">
+    <div class="admin-heading">
+        <div><p class="eyebrow">CHI TIẾT ĐẶT PHÒNG</p><h1>@booking.Room.Name</h1><p class="text-muted">Booking #@booking.Id · @booking.Status</p></div>
+        <a class="secondary-action" asp-action="Mine">← Lịch đặt phòng</a>
+    </div>
+    @if (TempData["BookingDetailsNotice"] is string notice) { <div class="alert alert-info">@notice</div> }
+
+    <section class="booking-detail-summary">
+        <div><span>Khách lưu trú</span><strong>@booking.Customer.FullName</strong></div>
+        <div><span>Thời gian</span><strong>@booking.CheckIn.ToString("dd/MM/yyyy") – @booking.CheckOut.ToString("dd/MM/yyyy")</strong></div>
+        <div><span>Phương thức</span><strong>@booking.Payment?.Method</strong></div>
+        <div><span>Thanh toán</span><strong>@booking.Payment?.Status</strong></div>
+    </section>
+
+    <div class="booking-detail-columns">
+        <section class="detail-section">
+            <div class="section-heading compact-heading"><div><p class="eyebrow">DỊCH VỤ</p><h2>Dịch vụ trong booking</h2></div></div>
+            @if (booking.BookingServices.Count == 0)
+            {
+                <p class="empty-services">Booking chưa có dịch vụ bổ sung.</p>
+            }
+            else
+            {
+                <div class="table-wrap"><table class="table align-middle"><thead><tr><th>Dịch vụ</th><th>Đơn giá</th><th>Số lượng</th><th>Tạm tính</th><th>Thanh toán</th></tr></thead><tbody>
+                    @foreach (var item in booking.BookingServices.OrderBy(item => item.Service.Name))
+                    {
+                        <tr>
+                            <td>@item.Service.Name</td>
+                            <td>@item.UnitPrice.ToString("N0") VNĐ</td>
+                            <td>@item.Quantity</td>
+                            <td>@((item.UnitPrice * item.Quantity).ToString("N0")) VNĐ</td>
+                            <td>
+                                <span class="service-payment-status @(item.IsPaid ? "service-paid" : "service-unpaid")">@(item.IsPaid ? "Đã thanh toán" : "Chờ thanh toán")</span>
+                                @if (!item.IsPaid && Model.CanAddServices)
+                                {
+                                    <form asp-action="CancelUnpaidService" method="post" class="cancel-booking-service-form" onsubmit="return confirm('Hủy dịch vụ @item.Service.Name chưa thanh toán?')">
+                                        <input type="hidden" name="id" value="@booking.Id" />
+                                        <input type="hidden" name="serviceId" value="@item.ServiceId" />
+                                        <button class="table-action booking-cancel-action" type="submit">Hủy dịch vụ</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody></table></div>
+            }
+
+            @if (Model.CanAddServices)
+            {
+                <form asp-action="AddServices" method="post" class="add-services-form">
+                    <input type="hidden" name="id" value="@booking.Id" />
+                    <h3>Đăng ký thêm dịch vụ</h3>
+                    @if (Model.AvailableServices.Count == 0)
+                    {
+                        <p class="text-muted">Hiện chưa có dịch vụ để đăng ký.</p>
+                    }
+                    else
+                    {
+                        <fieldset class="service-options">
+                            <legend>Chọn dịch vụ</legend>
+                            @foreach (var service in Model.AvailableServices)
+                            {
+                                var alreadyAdded = booking.BookingServices.FirstOrDefault(item => item.ServiceId == service.Id);
+                                @if (alreadyAdded is not null)
+                                {
+                                    <label class="service-already-added"><input type="checkbox" checked disabled aria-label="@service.Name đã được đăng ký" /> @service.Name · @service.Price.ToString("N0") VNĐ · @(alreadyAdded.IsPaid ? $"Đã đăng ký ({alreadyAdded.Quantity})" : $"Chờ thanh toán ({alreadyAdded.Quantity})")</label>
+                                }
+                                else
+                                {
+                                    <label><input type="checkbox" name="serviceIds" value="@service.Id" /> @service.Name · @service.Price.ToString("N0") VNĐ</label>
+                                }
+                            }
+                        </fieldset>
+                        <p class="payment-note">@if (booking.Payment?.Method == "Card") { <text>Dịch vụ mới sẽ được chuyển tới checkout để thanh toán ngay. Chỉ sau khi thanh toán thành công, dịch vụ mới chuyển sang đã đăng ký.</text> } else { <text>Dịch vụ mới sẽ ở trạng thái chờ thanh toán; nhân viên sẽ xác nhận sau khi thu phụ phí tại khách sạn.</text> }</p>
+                        <button class="primary-action" type="submit">@(booking.Payment?.Method == "Card" ? "Xác nhận và thanh toán" : "Xác nhận dịch vụ")</button>
+                    }
+                </form>
+            }
+        </section>
+
+        <aside class="booking-cost-summary">
+            <p class="eyebrow">CHI PHÍ</p>
+            <div><span>Tổng booking</span><strong>@booking.TotalAmount.ToString("N0") VNĐ</strong></div>
+            <div><span>Đã thanh toán</span><strong>@Model.PaidAmount.ToString("N0") VNĐ</strong></div>
+            <div class="balance-due"><span>Còn phải thanh toán</span><strong>@Model.AmountDue.ToString("N0") VNĐ</strong></div>
+            @if (booking.Payment?.Method == "Card" && Model.AmountDue > 0 && booking.Payment.Status == PaymentStatus.Paid)
+            {
+                <form asp-controller="Payments" asp-action="DemoCheckout" method="get"><input type="hidden" name="bookingId" value="@booking.Id" /><button class="primary-action pay-service-action" type="submit">Thanh toán phụ thu online</button></form>
+            }
+            @if (booking.Status != HotelBooking.Web.Models.BookingStatus.Cancelled)
+            {
+                var review = booking.Reviews.FirstOrDefault();
+                @if (review is null)
+                {
+                    <a class="primary-action review-action" asp-controller="Reviews" asp-action="Create" asp-route-bookingId="@booking.Id">Đánh giá phòng</a>
+                }
+                else
+                {
+                    <section class="customer-review-panel">
+                        <p class="eyebrow">ĐÁNH GIÁ CỦA BẠN</p>
+                        <div class="customer-review-heading"><strong class="review-stars">@(new string('★', review.Rating))</strong><small>@review.CreatedAt.ToString("dd/MM/yyyy")</small></div>
+                        <p>@review.Comment</p>
+                        <div class="customer-review-actions">
+                            <a class="secondary-action" asp-controller="Reviews" asp-action="Edit" asp-route-id="@review.Id">Sửa đánh giá</a>
+                            <form asp-controller="Reviews" asp-action="Delete" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?')">
+                                <input type="hidden" name="id" value="@review.Id" />
+                                <button class="table-action booking-cancel-action" type="submit">Xóa đánh giá</button>
+                            </form>
+                        </div>
+                    </section>
+                }
+            }
+        </aside>
+    </div>
+</div>

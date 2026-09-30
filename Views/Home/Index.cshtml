@@ -1,0 +1,51 @@
+﻿@model HotelBooking.Web.Models.HomeViewModel
+@{ ViewData["Title"] = "Đặt phòng khách sạn"; }
+
+<section class="hero-panel">
+    <p class="eyebrow">STAY / REST / RETURN</p>
+    <h1>Ở lại lâu hơn<br /><span>với cảm giác đúng nơi.</span></h1>
+    <p class="hero-copy">Tìm căn phòng phù hợp cho chuyến đi tiếp theo của bạn.</p>
+    <form asp-controller="Rooms" asp-action="Search" method="get" class="search-panel">
+        <label asp-for="Search.CheckIn"></label><input asp-for="Search.CheckIn" />
+        <label asp-for="Search.CheckOut"></label><input asp-for="Search.CheckOut" />
+        <label asp-for="Search.Guests">Số khách</label><input asp-for="Search.Guests" min="1" />
+        <button type="submit">Tìm phòng <span aria-hidden="true">→</span></button>
+    </form>
+</section>
+
+<main class="home-content">
+    <section class="intro-section">
+        <div>
+            <p class="eyebrow">ROYAL HOTEL / NHA TRANG</p>
+            <h2>Một khoảng lặng<br />giữa hành trình.</h2>
+        </div>
+        <p>Royal Hotel là nơi những ngày nghỉ trở nên trọn vẹn hơn. Từ căn phòng ngập nắng sớm đến bữa sáng chỉn chu, mọi chi tiết đều được chuẩn bị để bạn thật sự thư giãn.</p>
+    </section>
+
+    <section class="rooms-section" id="rooms">
+        <div class="section-heading"><div><p class="eyebrow">CHỌN KHÔNG GIAN CỦA BẠN</p><h2>Những căn phòng nổi bật</h2></div><a class="text-link" asp-controller="Rooms" asp-action="Index">Xem tất cả phòng <span>→</span></a></div>
+        <div class="home-room-grid">
+            @foreach (var room in Model.FeaturedRooms)
+            {
+                <article class="home-room-card">
+                    <div class="room-image room-image-@room.Type.ToLowerInvariant()"><span>@room.Type</span></div>
+                    <div class="room-card-body"><p class="room-code">@room.Code · @room.Capacity khách</p><h3>@room.Name</h3><p>@room.Description</p><div class="room-card-footer"><strong>@room.PricePerNight.ToString("N0") <small>VNĐ / đêm</small></strong><a asp-controller="Bookings" asp-action="Create" asp-route-roomId="@room.Id" asp-route-checkIn="@Model.Search.CheckIn.ToString("O")" asp-route-checkOut="@Model.Search.CheckOut.ToString("O")" aria-label="Đặt @room.Name">Đặt ngay <span>→</span></a></div></div>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="experience-section">
+        <div class="experience-image"></div>
+        <div class="experience-copy"><p class="eyebrow">TRẢI NGHIỆM ROYAL</p><h2>Đủ gần để khám phá.<br />Đủ yên để hồi phục.</h2><p>Không gian thư thái, những món ăn địa phương và đội ngũ luôn sẵn sàng giúp chuyến đi của bạn nhẹ nhàng hơn.</p><a class="primary-action" asp-controller="Services" asp-action="Index">Khám phá dịch vụ</a></div>
+    </section>
+
+    <section class="home-services"><div class="section-heading"><div><p class="eyebrow">DỊCH VỤ CHO MỘT NGÀY DỄ CHỊU</p><h2>Chúng tôi lo phần còn lại.</h2></div></div><div class="service-strip">@for (var index = 0; index < Model.Services.Count; index++) { var service = Model.Services[index]; <article><span class="service-number">0@(index + 1)</span><h3>@service.Name</h3><p>@service.Description</p><strong>@service.Price.ToString("N0") VNĐ</strong></article> }</div></section>
+
+    @if (Model.Reviews.Count > 0)
+    {
+        <section class="guest-reviews"><p class="eyebrow">LỜI NHẮN TỪ KHÁCH LƯU TRÚ</p><h2>Những trải nghiệm được chia sẻ.</h2><div class="guest-review-grid">@foreach (var review in Model.Reviews) { <article><div class="review-stars">@("★".PadLeft(review.Rating, '★'))</div><blockquote>“@review.Comment”</blockquote><p>@review.Customer.FullName</p><small>@review.CreatedAt.ToString("dd/MM/yyyy")</small></article> }</div></section>
+    }
+
+    <section class="quote-section"><p class="quote-mark">“</p><blockquote>Một nơi khiến bạn muốn tắt điện thoại, mở cửa sổ và ở lại thêm một đêm.</blockquote><p class="quote-source">ROYAL HOTEL / NƠI ĐỂ TRỞ VỀ</p></section>
+</main>

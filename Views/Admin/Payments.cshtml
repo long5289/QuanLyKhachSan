@@ -1,0 +1,17 @@
+@model IReadOnlyList<HotelBooking.Web.Models.Payment>
+@{ ViewData["Title"] = "Quản lý thanh toán"; }
+<div class="container py-5 admin-page">
+    <div class="admin-heading"><div><p class="eyebrow">ĐỐI SOÁT</p><h1>Thanh toán</h1></div><a asp-action="Index">← Tổng quan</a></div>
+    @if (TempData["PaymentError"] is string paymentError) { <div class="alert alert-warning">@paymentError</div> }
+    <div class="table-wrap"><table class="table align-middle"><thead><tr><th>Mã booking</th><th>Khách</th><th>Phòng</th><th>Đã thu</th><th>Còn phải thu</th><th>Phương thức</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
+    @foreach (var payment in Model)
+    {
+        <tr><td>#@payment.BookingId<br /><small>@payment.Booking.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small></td><td>@payment.Booking.Customer.FullName<br /><small>@payment.Booking.Customer.Email</small></td><td>@payment.Booking.Room.Name</td><td>@payment.Amount.ToString("N0") VNĐ</td><td>@Math.Max(0, payment.Booking.TotalAmount - payment.Amount).ToString("N0") VNĐ</td><td>@(payment.Method == "Card" ? "Thẻ (demo)" : payment.Method)<br /><small>@payment.TransactionCode</small></td><td>@payment.Status</td><td class="payment-actions">
+            @if (payment.Status == PaymentStatus.Pending) { <form asp-action="SetPaymentStatus" method="post" class="payment-confirm-form"><input type="hidden" name="bookingId" value="@payment.BookingId" /><input type="hidden" name="status" value="Paid" /><button class="table-action" type="submit">Xác nhận đã thu</button></form><form asp-action="SetPaymentStatus" method="post"><input type="hidden" name="bookingId" value="@payment.BookingId" /><input type="hidden" name="status" value="Failed" /><button class="table-action" type="submit">Đánh dấu lỗi</button></form> }
+            @if (payment.Status == PaymentStatus.Failed) { <form asp-action="SetPaymentStatus" method="post"><input type="hidden" name="bookingId" value="@payment.BookingId" /><input type="hidden" name="status" value="Pending" /><button class="table-action" type="submit">Mở lại</button></form> }
+            @if (payment.Status == PaymentStatus.Paid) { <form asp-action="SetPaymentStatus" method="post"><input type="hidden" name="bookingId" value="@payment.BookingId" /><input type="hidden" name="status" value="Refunded" /><button class="table-action" type="submit">Hoàn tiền</button></form> }
+            @if (payment.Status == PaymentStatus.Paid && payment.Booking.TotalAmount > payment.Amount) { <form asp-action="SetPaymentStatus" method="post"><input type="hidden" name="bookingId" value="@payment.BookingId" /><input type="hidden" name="status" value="Paid" /><button class="table-action" type="submit">Đã thu phụ thu</button></form> }
+        </td></tr>
+    }
+    </tbody></table></div>
+</div>

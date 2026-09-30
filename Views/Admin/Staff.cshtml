@@ -1,0 +1,20 @@
+@model HotelBooking.Web.Models.AdminStaffViewModel
+@{ ViewData["Title"] = "Quản lý nhân viên"; }
+<div class="container py-5 admin-page">
+    <div class="admin-heading"><div><p class="eyebrow">TÀI KHOẢN NỘI BỘ</p><h1>Quản lý nhân viên</h1></div><a asp-action="Index">← Tổng quan</a></div>
+    <form asp-action="AddStaff" method="post" class="admin-form staff-form">
+        <h2>Tạo tài khoản nhân viên</h2>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="NewStaff.FullName" placeholder="Họ và tên" />
+        <input asp-for="NewStaff.Email" placeholder="Email đăng nhập" />
+        <input asp-for="NewStaff.Phone" placeholder="Số điện thoại" />
+        <input asp-for="NewStaff.Password" placeholder="Mật khẩu tạm (ít nhất 8 ký tự)" />
+        <button class="primary-action" type="submit">Tạo nhân viên</button>
+    </form>
+    <div class="table-wrap mt-5"><table class="table align-middle"><thead><tr><th>Họ tên</th><th>Email</th><th>Điện thoại</th><th>Quyền</th><th></th></tr></thead><tbody>
+    @foreach (var staff in Model.Staff)
+    {
+        <tr><td>@staff.FullName</td><td>@staff.Email</td><td>@staff.Phone</td><td>@staff.Role</td><td><form asp-action="DeleteStaff" method="post"><input type="hidden" name="id" value="@staff.Id" /><button class="table-action" type="submit">Vô hiệu hóa</button></form></td></tr>
+    }
+    </tbody></table></div>
+</div>

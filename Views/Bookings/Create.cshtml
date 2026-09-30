@@ -1,0 +1,40 @@
+@model HotelBooking.Web.Models.BookingCreateViewModel
+@{ ViewData["Title"] = "Xác nhận đặt phòng"; }
+
+<div class="container py-5 booking-layout">
+    <div>
+        <p class="eyebrow">XÁC NHẬN ĐẶT PHÒNG</p>
+        <h1>@Model.RoomName</h1>
+        <p class="text-muted">@Model.CheckIn.ToString("dd/MM/yyyy") - @Model.CheckOut.ToString("dd/MM/yyyy")</p>
+        <p class="booking-price">@Model.PricePerNight.ToString("N0") VNĐ <small>/ đêm</small></p>
+    </div>
+    <form asp-action="Create" method="post" class="form-panel">
+        <input asp-for="RoomId" type="hidden" /><input asp-for="RoomName" type="hidden" /><input asp-for="PricePerNight" type="hidden" />
+        <label asp-for="CheckIn"></label><input asp-for="CheckIn" type="date" class="form-control" />
+        <label asp-for="CheckOut"></label><input asp-for="CheckOut" type="date" class="form-control" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <label asp-for="FullName"></label><input asp-for="FullName" class="form-control" readonly />
+        <label asp-for="Email"></label><input asp-for="Email" class="form-control" readonly />
+        <label asp-for="Phone"></label><input asp-for="Phone" class="form-control" readonly />
+        @if (Model.Services.Count > 0)
+        {
+            <fieldset class="service-options"><legend>Dịch vụ thêm</legend>@foreach (var service in Model.Services) { <label><input type="checkbox" name="SelectedServiceIds" value="@service.Id" /> @service.Name - @service.Price.ToString("N0") VNĐ</label> }</fieldset>
+        }
+        <label asp-for="PaymentMethod">Phương thức thanh toán</label>
+        <select asp-for="PaymentMethod" class="form-select">
+            <option value="" disabled>Chọn phương thức thanh toán</option>
+            <option value="Cash">Thanh toán tại khách sạn</option>
+            <option value="Card">Thanh toán online bằng thẻ (demo)</option>
+        </select>
+        @if (Model.PaymentMethod == "Card")
+        {
+            <p class="payment-note">Bạn sẽ được chuyển tới trang thanh toán demo. Không nhập thông tin thẻ thật; demo không thu tiền thật.</p>
+        }
+        else
+        {
+            <p class="payment-note">Yêu cầu thanh toán sẽ ở trạng thái chờ. Nhân viên xác nhận sau khi nhận tiền.</p>
+        }
+        <button class="primary-action" type="submit">Gửi yêu cầu đặt phòng</button>
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
